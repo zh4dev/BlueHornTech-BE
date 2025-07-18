@@ -13,7 +13,15 @@ async function main() {
   // Middleware
   app.use(express.json({ limit: maximumUpload }));
   app.use(express.urlencoded({ extended: true, limit: maximumUpload }));
-  app.use(cors());
+  app.use(
+    cors({
+      origin: [
+        "https://blue-horn-tech-gc23m563o-zh4devs-projects.vercel.app/",
+        "http://localhost:5173",
+        "http://localhost:3003",
+      ],
+    })
+  );
 
   // Register routes
   app.use(AppSetupService.getRouter());
