@@ -5,3 +5,4 @@ node_modules
 .env.prod
 
 /src/generated/prisma
+.vercel
