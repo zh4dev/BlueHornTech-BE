@@ -528,7 +528,6 @@ class SchedulesController extends CrudControllerHelper {
                 lt: DateHelper.getDateNow(),
               },
               visitLog: {
-                startTime: { not: null },
                 endTime: null,
               },
             },
