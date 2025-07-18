@@ -56,7 +56,7 @@
 5. **Run database migrations**
 
    ```bash
-   npx prisma migrate dev
+   npx prisma db push
    ```
 
 6. **Start the development server**
