@@ -16,7 +16,7 @@ async function main() {
   app.use(
     cors({
       origin: [
-        "https://blue-horn-tech-gc23m563o-zh4devs-projects.vercel.app/",
+        "https://blue-horn-tech-gc23m563o-zh4devs-projects.vercel.app",
         "http://localhost:5173",
         "http://localhost:3003",
       ],
