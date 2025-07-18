@@ -98,13 +98,11 @@ class SchedulesController extends CrudControllerHelper {
             {
               title: `Task ${i + 1}A`,
               description: "Do something important",
-              completed: false,
               scheduleId: schedule.id,
             },
             {
               title: `Task ${i + 1}B`,
               description: "Another task description",
-              completed: false,
               scheduleId: schedule.id,
             },
           ],
