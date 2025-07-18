@@ -524,7 +524,13 @@ class SchedulesController extends CrudControllerHelper {
             where: {
               caregiverId,
               clientId,
-              visitLog: { endTime: null },
+              endTime: {
+                lt: DateHelper.getDateNow(),
+              },
+              visitLog: {
+                startTime: { not: null },
+                endTime: null,
+              },
             },
           }),
         ]);
