@@ -6,6 +6,10 @@ const router = express.Router();
 const scheduleController = new SchedulesController();
 const apiPath = "/schedules";
 
+router.post(`${apiPath}/reset-generate`, (req: Request, res: Response) => {
+  scheduleController.resetAndGenerateData(req, res);
+});
+
 router.get(apiPath, (req: Request, res: Response) => {
   scheduleController.getAll(req, res);
 });

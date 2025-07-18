@@ -51,8 +51,8 @@ class ScheduleHelper {
     res: Response;
   }): Promise<boolean> {
     const now = DateHelper.getDateNow();
-    const scheduleStart = new Date(startTime);
-    const scheduleEnd = new Date(endTime);
+    const scheduleStart = DateHelper.convertToDate(startTime);
+    const scheduleEnd = DateHelper.convertToDate(endTime);
     const bufferMinutes = 15;
 
     if (visitLog?.startTime) {
@@ -103,7 +103,7 @@ class ScheduleHelper {
     req: Request;
     res: Response;
   }): Promise<boolean> {
-    const now = new Date();
+    const now = DateHelper.getDateNow();
     const minVisitDuration = 5;
 
     if (!visitLog?.startTime) {

@@ -24,13 +24,103 @@ import {
 import { CrudControllerHelper } from "../helpers/crud-controller-helper";
 import GlobalConstant from "../constants/global-constant";
 import { idSchema } from "../schemas/global-schema";
-import { ServerErrorInterface } from "../interfaces/server/server-error-interface";
-import { getDistance } from "geolib";
 import GeocodeHelper from "../helpers/geocode-helper";
 
 class SchedulesController extends CrudControllerHelper {
   constructor() {
     super("schedule");
+  }
+
+  public async resetAndGenerateData(
+    req: Request,
+    res: Response
+  ): Promise<void> {
+    try {
+      const { lat, lng } = geolocationSchema.parse(req.body);
+
+      await prisma.visitLog.deleteMany();
+      await prisma.task.deleteMany();
+      await prisma.schedule.deleteMany();
+      await prisma.user.deleteMany();
+
+      const caregiver = await prisma.user.create({
+        data: {
+          name: "Caregiver",
+          email: "caregiver1@example.com",
+          address: "123 Main St, Springfield, IL 62704",
+          phone: "081234567890",
+          role: UserRole.CAREGIVER,
+          picture: "https://randomuser.me/api/portraits/women/40.jpg",
+        },
+      });
+
+      const client = await prisma.user.create({
+        data: {
+          name: "Client",
+          email: "client1@example.com",
+          address: "789 Oak Avenue, San Francisco, CA 94102",
+          phone: "089876543210",
+          role: UserRole.CLIENT,
+          picture: "https://randomuser.me/api/portraits/women/25.jpg",
+        },
+      });
+
+      const numberOfSchedules = 5;
+      const serviceNames = Object.values(ServiceName);
+      const initialStartTime = DateHelper.getDateNow();
+
+      for (let i = 0; i < numberOfSchedules; i++) {
+        const startTime = DateHelper.convertToDate(
+          initialStartTime.getTime() + i * 60 * 60 * 1000
+        );
+        const endTime = DateHelper.convertToDate(
+          startTime.getTime() + 60 * 60 * 1000
+        );
+
+        const selectedServiceName = serviceNames[i % serviceNames.length];
+
+        const schedule = await prisma.schedule.create({
+          data: {
+            date: initialStartTime,
+            startTime,
+            endTime,
+            lat,
+            lng,
+            serviceName: selectedServiceName as ServiceName,
+            caregiverId: caregiver.id,
+            clientId: client.id,
+            serviceNotes: `Dummy schedule ${i + 1}`,
+          },
+        });
+
+        await prisma.task.createMany({
+          data: [
+            {
+              title: `Task ${i + 1}A`,
+              description: "Do something important",
+              completed: false,
+              scheduleId: schedule.id,
+            },
+            {
+              title: `Task ${i + 1}B`,
+              description: "Another task description",
+              completed: false,
+              scheduleId: schedule.id,
+            },
+          ],
+        });
+      }
+
+      await this.serverHelper.sendResponse({
+        res,
+        req,
+        success: true,
+        message: SuccessMessageConstant.successResetGenerateData,
+        serverCode: ServerCode.success,
+      });
+    } catch (e) {
+      await this.serverHelper.onCatchError(e, res, req);
+    }
   }
 
   public async delete(req: Request, res: Response): Promise<void> {
@@ -301,7 +391,7 @@ class SchedulesController extends CrudControllerHelper {
   public getStartedSchedule = async (req: Request, res: Response) => {
     try {
       const data = startedScheduleSchema.parse(req.body);
-      const now = new Date();
+      const now = DateHelper.getDateNow();
       const { start, end } = DateHelper.getTodayRange();
 
       const value = await prisma.schedule.findFirst({
@@ -465,7 +555,7 @@ class SchedulesController extends CrudControllerHelper {
           tasks: true,
         },
         orderBy: {
-          createdAt: "desc",
+          startTime: "asc",
         },
       });
 
