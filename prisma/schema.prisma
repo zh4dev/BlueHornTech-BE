@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CAREGIVER
+  CLIENT
+}
+
+enum ServiceName {
+  ELDERLY_CARE
+  CHILD_AND_MATERNITY_CARE
+  THERAPY_AND_REHAB
+  MENTAL_AND_SPECIAL_SUPPORT
+  DAILY_ASSISTANCE
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  address   String
+  email     String   @unique
+  role      UserRole @default(CAREGIVER)
+  picture   String?
+  phone     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  caregiverSchedules Schedule[] @relation("CaregiverSchedules")
+  clientSchedules    Schedule[] @relation("ClientSchedules")
+}
+
+model Schedule {
+  id           Int         @id @default(autoincrement())
+  date         DateTime
+  startTime    DateTime
+  endTime      DateTime
+  lat          Float
+  lng          Float
+  serviceName  ServiceName
+  caregiverId  Int
+  clientId     Int
+  serviceNotes String
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  caregiver User      @relation("CaregiverSchedules", fields: [caregiverId], references: [id])
+  client    User      @relation("ClientSchedules", fields: [clientId], references: [id])
+  visitLog  VisitLog?
+  tasks     Task[]
+}
+
+model VisitLog {
+  id         Int       @id @default(autoincrement())
+  scheduleId Int       @unique
+  startTime  DateTime?
+  startLat   Float?
+  startLng   Float?
+  endTime    DateTime?
+  endLat     Float?
+  endLng     Float?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  schedule Schedule @relation(fields: [scheduleId], references: [id])
+}
+
+model Task {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  completed   Boolean? 
+  reason      String?
+  scheduleId  Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  schedule Schedule @relation(fields: [scheduleId], references: [id])
+}

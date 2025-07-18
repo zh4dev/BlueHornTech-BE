@@ -1,0 +1,47 @@
+{
+  "name": "blue-horn-tech",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "prepare:dev": "cp .env.dev .env",
+    "prepare:prod": "cp .env.prod .env",
+    "dev": "npm run prepare:dev && ts-node-dev src/index.ts",
+    "prod": "npm run prepare:prod && ts-node-dev src/index.ts",
+    "deploy:dev": "npm run prepare:dev && tsc -p tsconfig.dev.json",
+    "deploy:prod": "npm run prepare:prod && tsc -p tsconfig.prod.json"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^6.11.1",
+    "axios": "^1.10.0",
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
+    "date-fns": "^4.1.0",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "express-rate-limit": "^7.5.0",
+    "express-session": "^1.18.1",
+    "geolib": "^3.3.4",
+    "multer": "^2.0.0",
+    "nodemailer": "^7.0.3",
+    "redis": "^5.0.1",
+    "tailwindcss": "^4.1.11",
+    "uuidv4": "^6.2.13",
+    "zod": "^4.0.5"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/cors": "^2.8.18",
+    "@types/express": "^5.0.2",
+    "@types/express-session": "^1.18.1",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/multer": "^1.4.12",
+    "@types/node": "^22.15.18",
+    "prisma": "^6.11.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.8.3"
+  },
+  "description": ""
+}
