@@ -488,45 +488,34 @@ class SchedulesController extends CrudControllerHelper {
         req.query
       );
 
-      let filter: Record<string, any> | undefined = undefined;
-      let stats: Record<string, any> | undefined = undefined;
-
-      if (!(await this.validateUser(req, res, caregiverId, UserRole.CAREGIVER)))
+      if (
+        !(await this.validateUser(req, res, caregiverId, UserRole.CAREGIVER)) ||
+        !(await this.validateUser(req, res, clientId, UserRole.CLIENT))
+      )
         return;
 
-      if (!(await this.validateUser(req, res, clientId, UserRole.CLIENT)))
-        return;
+      const baseWhere = { caregiverId, clientId };
+      let filter: Record<string, any> = { ...baseWhere };
+      let stats: Record<string, number> | undefined = undefined;
 
-      if (showToday == true) {
+      if (showToday) {
         const { start, end } = DateHelper.getTodayRange();
+        filter.date = { gte: start, lte: end };
 
-        filter = {
-          date: { gte: start, lte: end },
-        };
-
-        const totalCount = await prisma.schedule.count({
-          where: {
-            caregiverId,
-            clientId,
-          },
-        });
+        const totalCount = await prisma.schedule.count({ where: baseWhere });
 
         const [completedCount, missedCount] = await Promise.all([
           prisma.schedule.count({
             where: {
-              caregiverId,
-              clientId,
+              ...baseWhere,
               date: { gte: start, lte: end },
               visitLog: { endTime: { not: null } },
             },
           }),
           prisma.schedule.count({
             where: {
-              caregiverId,
-              clientId,
-              endTime: {
-                lt: DateHelper.getDateNow(),
-              },
+              ...baseWhere,
+              endTime: { lt: DateHelper.getDateNow() },
               visitLog: {
                 is: {
                   startTime: { not: null },
@@ -537,40 +526,45 @@ class SchedulesController extends CrudControllerHelper {
           }),
         ]);
 
-        const upcomingCount = totalCount - completedCount - missedCount;
         stats = {
           total: totalCount,
           completed: completedCount,
           missed: missedCount,
-          upcoming: upcomingCount,
+          upcoming: totalCount - completedCount - missedCount,
         };
       }
 
-      filter = {
-        ...filter,
-        caregiverId,
+      const include = {
+        client: true,
+        caregiver: true,
+        visitLog: true,
+        tasks: true,
       };
-      const result = await PrismaHelper.getAll<Schedule>({
+
+      const orderBy = { startTime: "asc" as const };
+
+      let result = await PrismaHelper.getAll<Schedule>({
         req,
         model: "schedule",
         filter,
-        include: {
-          client: true,
-          caregiver: true,
-          visitLog: true,
-          tasks: true,
-        },
-        orderBy: {
-          startTime: "asc",
-        },
+        include,
+        orderBy,
       });
 
-      const totalSchedules = await prisma.schedule.count({
-        where: {
-          caregiverId,
-          clientId,
-        },
-      });
+      if (showToday && result.list.length === 0) {
+        const fallbackFilter = { ...filter };
+        delete fallbackFilter.date;
+
+        result = await PrismaHelper.getAll<Schedule>({
+          req,
+          model: "schedule",
+          filter: fallbackFilter,
+          include,
+          orderBy,
+        });
+      }
+
+      const totalSchedules = await prisma.schedule.count({ where: baseWhere });
 
       await this.serverHelper.sendResponse({
         res,
