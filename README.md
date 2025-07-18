@@ -142,3 +142,4 @@
 - Add token-based authentication for login
 - Add an admin role to manage data
 - Integrate AWS for upload a photo
+- Deployed on a VPS
