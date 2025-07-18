@@ -87,6 +87,7 @@
 - **Prisma** provides clean type-safe DB access and easy migration flow.
 - **PostgreSQL** is reliable for relational data.
 - **Zod** is the way to validate the request
+- **Discord Webhook** to notify/log errors when a 500 error occurs.
 
 ---
 
