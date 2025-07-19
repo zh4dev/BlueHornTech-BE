@@ -516,12 +516,15 @@ class SchedulesController extends CrudControllerHelper {
             where: {
               ...baseWhere,
               endTime: { lt: DateHelper.getDateNow() },
-              visitLog: {
-                is: {
-                  startTime: { not: null },
-                  endTime: null,
+              OR: [
+                { visitLog: null },
+                {
+                  visitLog: {
+                    startTime: { not: null },
+                    endTime: null,
+                  },
                 },
-              },
+              ],
             },
           }),
         ]);
@@ -749,7 +752,11 @@ class SchedulesController extends CrudControllerHelper {
       }
 
       const taskNotCompleted = await prisma.task.count({
-        where: { scheduleId: schedule.id, completed: false, reason: null },
+        where: {
+          scheduleId: schedule.id,
+          reason: null,
+          OR: [{ completed: false }, { completed: null }],
+        },
       });
 
       if (taskNotCompleted > 0) {
