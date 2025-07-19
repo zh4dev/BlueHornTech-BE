@@ -567,6 +567,7 @@ class SchedulesController extends CrudControllerHelper {
         });
       }
 
+      const listResult = ScheduleHelper.shortListData(result.list);
       const totalSchedules = await prisma.schedule.count({ where: baseWhere });
 
       await this.serverHelper.sendResponse({
@@ -577,7 +578,7 @@ class SchedulesController extends CrudControllerHelper {
         serverCode: ServerCode.success,
         data: {
           ...result,
-          list: await this.updatedList(result.list),
+          list: await this.updatedList(listResult),
           stats,
           totalSchedules,
         },

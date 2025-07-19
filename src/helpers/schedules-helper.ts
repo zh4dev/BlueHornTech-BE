@@ -4,7 +4,7 @@ import ErrorMessageConstant from "../constants/message/error-message-constant";
 import PrismaHelper from "./prisma-helper";
 import ServerHelper from "./server-helper";
 import { Request, Response } from "express";
-import { ServerCode } from "../constants/enum-constant";
+import { ScheduleStatusType, ServerCode } from "../constants/enum-constant";
 import prisma from "../services/prisma-client-service";
 import { ServerErrorInterface } from "../interfaces/server/server-error-interface";
 import GlobalConstant from "../constants/global-constant";
@@ -13,11 +13,35 @@ import { getDistance } from "geolib";
 class ScheduleHelper {
   private static serverHelper = new ServerHelper();
 
+  private static statusPriority: Record<ScheduleStatusType, number> = {
+    started: 1,
+    upcoming: 2,
+    missed: 3,
+    "in-progress": 4,
+    completed: 5,
+  };
+
+  static shortListData(list: Schedule[]): Schedule[] {
+    return list.sort((a, b) => {
+      const aStatus = this.getScheduleStatus({
+        startTime: a.startTime,
+        endTime: a.endTime,
+        visitLog: (a as any).visitLog,
+      });
+      const bStatus = ScheduleHelper.getScheduleStatus({
+        startTime: b.startTime,
+        endTime: b.endTime,
+        visitLog: (b as any).visitLog,
+      });
+      return this.statusPriority[aStatus] - this.statusPriority[bStatus];
+    });
+  }
+
   static getScheduleStatus(schedule: {
     startTime: Date;
     endTime: Date;
     visitLog?: VisitLog | null;
-  }): "completed" | "missed" | "in-progress" | "upcoming" | "started" {
+  }): ScheduleStatusType {
     if (schedule.visitLog?.endTime) {
       return "completed";
     }

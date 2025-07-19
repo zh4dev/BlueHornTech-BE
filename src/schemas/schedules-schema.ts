@@ -42,17 +42,22 @@ const scheduleFields = {
   ...geoLocationFields,
 };
 
-export const getAllScheduleSchema = getAllSchema.extend({
-  showToday: z
-    .union([z.boolean(), z.string()])
-    .optional()
-    .transform((val) => {
-      if (typeof val === "string") return val === "true";
-      return val ?? false;
-    }),
-  caregiverId: idValidatorSchema.optional(),
-  clientId: idValidatorSchema.optional(),
-});
+export const getAllScheduleSchema = getAllSchema
+  .extend({
+    showToday: z
+      .union([z.boolean(), z.string()])
+      .optional()
+      .transform((val) => {
+        if (typeof val === "string") return val === "true";
+        return val ?? false;
+      }),
+    caregiverId: idValidatorSchema.optional(),
+    clientId: idValidatorSchema.optional(),
+  })
+  .refine((data) => data.caregiverId != null || data.clientId != null, {
+    message: ErrorMessageConstant.bothCaregiverClientRequired,
+    path: ["caregiverId", "clientId"],
+  });
 
 export const createScheduleSchema = z.object({
   ...scheduleFields,

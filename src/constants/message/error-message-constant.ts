@@ -35,6 +35,8 @@ class ErrorMessageConstant {
   static missingCompletionStatus: string = "Mising completion status";
   static invalidCaregiverUser: string =
     "User is not assigned the caregiver role.";
+  static bothCaregiverClientRequired: string =
+    "Either caregiverId or clientId must be provided.";
   static invalidUser(role: UserRole): string {
     return `We couldn’t find the ${role.toLowerCase()} you’re looking for.`;
   }

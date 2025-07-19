@@ -1,4 +1,10 @@
 export type AllowedModels = "user" | "schedule" | "visitLog" | "task";
+export type ScheduleStatusType =
+  | "completed"
+  | "missed"
+  | "in-progress"
+  | "upcoming"
+  | "started";
 
 export enum PrismaError {
   invalid = "Invalid",
