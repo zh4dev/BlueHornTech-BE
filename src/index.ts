@@ -21,6 +21,8 @@ async function main() {
         "http://localhost:5173",
         "http://localhost:3003",
       ],
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type"],
     })
   );
 
